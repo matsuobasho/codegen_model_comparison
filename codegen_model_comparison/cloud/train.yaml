@@ -1,0 +1,35 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandComponent.schema.json
+type: command
+
+name: train_model
+display_name: train_model
+version: 1
+
+inputs:
+  data_path:
+    type: uri_file
+  batch_size:
+    type: integer
+  seq_length:
+    type: integer
+  epochs:
+    type: integer
+  learning_rate:
+    type: number
+
+outputs:
+  model_output:
+    type: mlflow_model
+
+code: ./src
+
+environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+
+command: >-
+  python train.py
+    --data_path ${{inputs.data}}
+    --batch_size ${{inputs.batch_size}}
+    --seq_length ${{inputs.seq_length}}
+    --epochs ${{inputs.epochs}}
+    --learning_rate ${{inputs.learning_rate}}
+
