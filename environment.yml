@@ -1,4 +1,4 @@
-name: <GITHUB_REPOSITORY>
+name: codegen_model_comparison
 channels:
   - anaconda
   - pytorch
