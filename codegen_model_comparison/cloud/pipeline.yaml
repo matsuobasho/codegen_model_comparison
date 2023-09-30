@@ -1,0 +1,37 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+display_name: pipeline_with_hyperparameter_sweep
+description: Tune hyperparameters using TF component
+settings:
+  default_compute: azureml:roma-gpu
+jobs:
+  sweep_step:
+    type: sweep
+    inputs:
+      data:
+        type: uri_file
+        path: azureml:code_train_data:@latest
+      seq_length:
+        type: integer
+      epochs:
+        type: integer
+    outputs:
+      model_output:
+    sampling_algorithm: random
+    trial: ./train.yml
+    search_space:
+      batch_size:
+        type: choice
+        values: [1, 5, 10, 15]
+      learning_rate:
+        type: loguniform
+        min_value: -6.90775527898 # ln(0.001)
+        max_value: -2.30258509299 # ln(0.1)
+    objective:
+      goal: maximize
+      primary_metric: eval_bleu_score # how mlflow outputs in other models
+    limits:
+      max_total_trials: 5
+      max_concurrent_trials: 3
+      timeout: 3600 # 1 hour
+      trial_timeout: 720 # 20 mins
