@@ -39,6 +39,7 @@ def compute_bleu_score(preds):
 
 def main(args):
     data_path = args.data_path  ###!!! to check later
+    output_path = args.model_dir
     batch_size = args.batch_size
     seq_length = args.seq_length
     epochs = args.epochs
@@ -76,7 +77,7 @@ def main(args):
         data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
         training_args = TrainingArguments(
-            output_dir="../trainer-codegen",
+            output_dir=output_path,
             evaluation_strategy="epoch",
             gradient_checkpointing=True,
             num_train_epochs=epochs,
@@ -101,6 +102,7 @@ def main(args):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_arguments("--data_path")
+    parser.add_arguments("--output_path")
     parser.add_arguments("--batch_size", type=int)
     parser.add_arguments("--seq_length", type=int)
     parser.add_arguments("--epochs", type=int)
