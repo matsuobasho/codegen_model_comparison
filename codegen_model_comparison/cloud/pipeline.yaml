@@ -1,7 +1,7 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 display_name: pipeline_with_hyperparameter_sweep
-description: Tune hyperparameters using TF component
+description: Tune hyperparameters
 settings:
   default_compute: azureml:roma-gpu
 jobs:
@@ -11,14 +11,12 @@ jobs:
       data:
         type: uri_file
         path: azureml:code_train_data:@latest
-      seq_length:
-        type: integer
-      epochs:
-        type: integer
+      seq_length: 100
+      epochs: 3
     outputs:
       model_output:
     sampling_algorithm: random
-    trial: ./train.yml
+    trial: ./train.yaml
     search_space:
       batch_size:
         type: choice
