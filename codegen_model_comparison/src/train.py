@@ -46,7 +46,7 @@ def main(args):
     learning_rate = args.learning_rate
 
     # Load data
-    with open(Path(data_path), "rb") as f:
+    with open(data_path, "rb") as f:
         data = pickle.load(f)
 
     checkpoint = "Salesforce/codegen-350M-mono"
@@ -107,7 +107,7 @@ def parse_args():
     parser.add_arguments("--seq_length", type=int)
     parser.add_arguments("--epochs", type=int)
     parser.add_arguments("--learning_rate", type=float)
-    args = parser.parse_args
+    args = parser.parse_args()
 
     return args
 

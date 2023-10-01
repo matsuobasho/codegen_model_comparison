@@ -11,12 +11,11 @@ jobs:
       data:
         type: uri_file
         path: azureml:code_train_data:@latest
-      seq_length: 100
-      epochs: 3
+      #seq_length: 100
+      #epochs: 3
     outputs:
       model_output:
     sampling_algorithm: random
-    trial: ./train.yaml
     search_space:
       batch_size:
         type: choice
@@ -25,6 +24,13 @@ jobs:
         type: loguniform
         min_value: -6.90775527898 # ln(0.001)
         max_value: -2.30258509299 # ln(0.1)
+    trial:
+      code: ../src
+      command: >-
+        python train.py --data_path ${{inputs.data}} --output_path ${{outputs.model_output}} --batch_size ${{search_space.batch_size}} --seq_length ${{inputs.seq_length}} --epochs ${{inputs.epochs}} --learning_rate ${{search_space.learning_rate}}
+
+
+      environment: azureml:env_finetune_component:1
     objective:
       goal: maximize
       primary_metric: eval_bleu_score # how mlflow outputs in other models
