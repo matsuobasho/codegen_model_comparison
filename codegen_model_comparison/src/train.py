@@ -41,8 +41,9 @@ def main(args):
     data_path = args.data_path  ###!!! to check later
     output_path = args.model_dir
     batch_size = args.batch_size
-    seq_length = args.seq_length
-    epochs = args.epochs
+    #seq_length = args.seq_length
+    seq_length = 100
+    #epochs = args.epochs
     learning_rate = args.learning_rate
 
     # Load data
@@ -80,7 +81,7 @@ def main(args):
             output_dir=output_path,
             evaluation_strategy="epoch",
             gradient_checkpointing=True,
-            num_train_epochs=epochs,
+            #num_train_epochs=epochs,
             learning_rate=learning_rate
             #gradient_accumulation_steps=8,
             #fp16 = True
@@ -104,8 +105,8 @@ def parse_args():
     parser.add_arguments("--data_path")
     parser.add_arguments("--output_path")
     parser.add_arguments("--batch_size", type=int)
-    parser.add_arguments("--seq_length", type=int)
-    parser.add_arguments("--epochs", type=int)
+    #parser.add_arguments("--seq_length", type=int)
+    #parser.add_arguments("--epochs", type=int)
     parser.add_arguments("--learning_rate", type=float)
     args = parser.parse_args()
 
