@@ -23,7 +23,7 @@ outputs:
 
 code: ../src
 
-environment: azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu@latest
+environment: azureml:pipeline_sweep_env:1
 
 command: >-
   python train.py
