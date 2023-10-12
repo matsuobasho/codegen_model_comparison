@@ -102,12 +102,12 @@ def main(args):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_arguments("--data_path")
-    parser.add_arguments("--output_path")
-    parser.add_arguments("--batch_size", type=int)
-    #parser.add_arguments("--seq_length", type=int)
-    #parser.add_arguments("--epochs", type=int)
-    parser.add_arguments("--learning_rate", type=float)
+    parser.add_argument("--data_path")
+    parser.add_argument("--output_path")
+    parser.add_argument("--batch_size", type=int)
+    #parser.add_argument("--seq_length", type=int)
+    #parser.add_argument("--epochs", type=int)
+    parser.add_argument("--learning_rate", type=float)
     args = parser.parse_args()
 
     return args
