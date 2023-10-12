@@ -41,9 +41,9 @@ def main(args):
     data_path = args.data_path  ###!!! to check later
     output_path = args.model_dir
     batch_size = args.batch_size
-    #seq_length = args.seq_length
+    seq_length = args.seq_length
     seq_length = 100
-    #epochs = args.epochs
+    epochs = args.epochs
     learning_rate = args.learning_rate
 
     # Load data
@@ -105,9 +105,9 @@ def parse_args():
     parser.add_argument("--data_path")
     parser.add_argument("--output_path")
     parser.add_argument("--batch_size", type=int)
-    #parser.add_argument("--seq_length", type=int)
-    #parser.add_argument("--epochs", type=int)
     parser.add_argument("--learning_rate", type=float)
+    parser.add_argument("--seq_length", type=int)
+    parser.add_argument("--epochs", type=int)
     args = parser.parse_args()
 
     return args

@@ -1,6 +1,6 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
-display_name: pipeline_with_hyperparameter_sweep
+display_name: codegen_sweep
 description: Tune hyperparameters
 settings:
   default_compute: azureml:roma2
@@ -11,6 +11,8 @@ jobs:
       data_path:
         type: uri_file
         path: azureml:code_train_data:1
+      seq_length: 100
+      epochs: 3
     outputs:
       model_output:
     sampling_algorithm: random
