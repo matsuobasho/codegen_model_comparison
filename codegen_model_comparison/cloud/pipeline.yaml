@@ -3,7 +3,7 @@ type: pipeline
 display_name: codegen_sweep
 description: Tune hyperparameters
 settings:
-  default_compute: azureml:roma2
+  default_compute: azureml:gpu-buck50
 jobs:
   sweep_step:
     type: sweep
@@ -12,7 +12,7 @@ jobs:
         type: uri_file
         path: azureml:code_train_data:1
       seq_length: 100
-      epochs: 3
+      epochs: 1
     outputs:
       model_output:
     sampling_algorithm: random
