@@ -3,12 +3,12 @@ type: pipeline
 display_name: pipeline_with_hyperparameter_sweep
 description: Tune hyperparameters
 settings:
-  default_compute: azureml:roma-gpu
+  default_compute: azureml:roma2
 jobs:
   sweep_step:
     type: sweep
     inputs:
-      data:
+      data_path:
         type: uri_file
         path: azureml:code_train_data:1
     outputs:
@@ -22,13 +22,7 @@ jobs:
         type: loguniform
         min_value: -6.90775527898 # ln(0.001)
         max_value: -2.30258509299 # ln(0.1)
-    trial:
-      code: ../src
-      command: >-
-        python train.py --data_path ${{inputs.data}} --output_path ${{outputs.model_output}} --batch_size ${{search_space.batch_size}} --learning_rate ${{search_space.learning_rate}}
-
-
-      environment: azureml:env_finetune_component:1
+    trial: ./train.yaml
     objective:
       goal: maximize
       primary_metric: eval_bleu_score # how mlflow outputs in other models
