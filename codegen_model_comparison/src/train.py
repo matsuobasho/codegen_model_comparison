@@ -34,6 +34,7 @@ def compute_bleu_score(preds):
     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
 
     res = bleu.compute(predictions=decode_predictions, references=decode_labels)
+    mlflow.log_metric('eval_bleu_score', res['bleu'])
     return {'bleu_score': res['bleu']}
 
 
@@ -81,10 +82,10 @@ def main(args):
             output_dir=output_path,
             evaluation_strategy="epoch",
             gradient_checkpointing=True,
-            #num_train_epochs=epochs,
+            num_train_epochs=epochs,
             learning_rate=learning_rate
             #gradient_accumulation_steps=8,
-            #fp16 = True
+            fp16 = True
         )
 
         trainer = Trainer(model,
