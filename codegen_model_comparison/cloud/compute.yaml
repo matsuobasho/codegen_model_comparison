@@ -1,7 +1,6 @@
-$schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json
+$schema: https://azuremlschemas.azureedge.net/latest/computeInstance.schema.json
 name: gpu-buck50
-type: amlcompute
+type: computeinstance
 size: Standard_NC16as_T4_v3
-location: australiaeast
-min_instances: 0
-max_instances: 4
+idle_time_before_shutdown_minutes: 15
+tier: low_priority
