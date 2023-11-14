@@ -1,0 +1,6 @@
+$schema: https://azuremlschemas.azureedge.net/latest/azureBlob.schema.json
+name: blob_storage
+type: azure_blob
+description: Blob storage
+account_name: myblobstore
+container_name: data-container
