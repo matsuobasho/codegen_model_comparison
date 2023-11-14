@@ -5,4 +5,5 @@
         80
     ],
     "editor.formatOnSave": true,
+    "azureml.defaultResourceGroup": "aus-east",
 }
