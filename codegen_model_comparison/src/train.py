@@ -1,10 +1,11 @@
+import argparse
+import logging
+from pathlib import Path
 import pickle
 import sys
 from statistics import mean
 
-import argparse
 import numpy as np
-
 import datasets
 import evaluate
 import mlflow
@@ -40,12 +41,21 @@ def compute_bleu_score(preds):
 
 def main(args):
     data_path = args.data_path  ###!!! to check later
-    output_path = args.model_dir
+    output_path = args.output_path
     batch_size = args.batch_size
     seq_length = args.seq_length
-    seq_length = 100
     epochs = args.epochs
     learning_rate = args.learning_rate
+
+    handler = logging.StreamHandler()
+    logger = logging.getLogger(__name__)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+    logger.info(f'path: {data_path}')
+    logger.info(f'batch_size: {batch_size}')
+    logger.info(f'seq_length: {seq_length}')
+    logger.info(f'epochs: {epochs}')
 
     # Load data
     with open(data_path, "rb") as f:
@@ -83,10 +93,9 @@ def main(args):
             evaluation_strategy="epoch",
             gradient_checkpointing=True,
             num_train_epochs=epochs,
-            learning_rate=learning_rate
+            learning_rate=learning_rate,
             #gradient_accumulation_steps=8,
-            fp16 = True
-        )
+            fp16=True)
 
         trainer = Trainer(model,
                           training_args,
@@ -103,12 +112,12 @@ def main(args):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_path")
+    parser.add_argument("--data_path", type=str)
     parser.add_argument("--output_path")
-    parser.add_argument("--batch_size", type=int)
-    parser.add_argument("--learning_rate", type=float)
-    parser.add_argument("--seq_length", type=int)
-    parser.add_argument("--epochs", type=int)
+    parser.add_argument("--batch_size", type=int, default=5)
+    parser.add_argument("--learning_rate", type=float, default=1e-5)
+    parser.add_argument("--seq_length", type=int, default=500)
+    parser.add_argument("--epochs", type=int, default=3)
     args = parser.parse_args()
 
     return args
