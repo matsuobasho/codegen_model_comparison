@@ -6,15 +6,19 @@ description: Finetuning pipeline for code generation
 display_name: code-finetune-pipeline
 experiment_name: code-finetune-pipeline
 jobs:
-  predict_baseline:
+  finetune:
     type: command
     inputs:
+      checkpoint: "t5-small"
+      #checkpoint: "Salesforce/codegen-350M-mono"
       data:
         type: uri_file
         path: azureml:functions:1
+      batch_size: 20
+      seq_length: 500
     code: ../src
     environment: azureml:pipeline_sweep_env@latest
     compute: azureml:cpu-inst
     command: >-
-      python predict_baseline.py --data_path ${{inputs.data}}
+      python finetune.py --checkpoint ${{checkpoint}} --data_path ${{inputs.data}} --batch_size ${{batch_size}} --seq_lengh ${{seq_length}}
 
