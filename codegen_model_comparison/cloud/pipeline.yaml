@@ -1,0 +1,20 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+description: Finetuning pipeline for code generation
+
+display_name: code-finetune-pipeline
+experiment_name: code-finetune-pipeline
+jobs:
+  predict_baseline:
+    type: command
+    inputs:
+      data:
+        type: uri_file
+        path: azureml:functions:1
+    code: ../src
+    environment: azureml:pipeline_sweep_env@latest
+    compute: azureml:cpu-inst
+    command: >-
+      python predict_baseline.py --data_path ${{inputs.data}}
+
