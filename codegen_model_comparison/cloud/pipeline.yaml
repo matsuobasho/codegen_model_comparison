@@ -15,10 +15,10 @@ jobs:
         type: uri_file
         path: azureml:functions:1
       batch_size: 20
-      seq_length: 500
+      seq_length: 100
     code: ../src
     environment: azureml:pipeline_sweep_env@latest
     compute: azureml:cpu-inst
     command: >-
-      python finetune.py --checkpoint ${{checkpoint}} --data_path ${{inputs.data}} --batch_size ${{batch_size}} --seq_lengh ${{seq_length}}
+      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_lengh ${{inputs.seq_length}}
 
