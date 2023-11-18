@@ -1,6 +1,5 @@
 import argparse
 import logging
-import pickle
 import sys
 
 import datasets
@@ -8,6 +7,8 @@ import evaluate
 import torch
 from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments)
+
+from dataset_test import prompt, answer
 
 
 def tokenize_function(example, tokenizer, seq_length):
@@ -52,12 +53,6 @@ def main(args):
     model = AutoModelForCausalLM.from_pretrained(
         checkpoint, trust_remote_code=True).to(device)
 
-    # !!! Test whether this is working
-    sys.path.insert(0, test_data_path)
-    from test_funcs import prompt, answer
-    logger.info(prompt)
-    logger.info(answer)
-
     # !!! Then modify this to do it an elegant way
     text1_predict_bfinetune = generate_text(prompt[0],
                                             model,
@@ -84,12 +79,18 @@ def main(args):
         text3_predict_bfinetune
     ],
                                 references=answer)
+    logger.info(bleu_results)
+    # !!! Where to save these results ?
 
+    chrf = evaluate.load("chrf")
     chrf_results = chrf.compute(predictions=[
         text1_predict_bfinetune, text2_predict_bfinetune,
         text3_predict_bfinetune
     ],
                                 references=answer)
+    logger.info(chrf_results)
+
+    # !!! Where to save predictions for examination?
 
 
 def parse_args():
