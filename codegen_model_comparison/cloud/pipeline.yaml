@@ -16,8 +16,8 @@ jobs:
   finetune:
     type: command
     inputs:
-      checkpoint: "stanford-crfm/alias-gpt2-small-x21"
-      #checkpoint: "Salesforce/codegen-350M-mono"
+      #checkpoint: "stanford-crfm/alias-gpt2-small-x21"
+      checkpoint: "Salesforce/codegen-350M-mono"
       data:
         type: uri_file
         path: azureml:functions:1
@@ -26,6 +26,8 @@ jobs:
     outputs:
       model:
         type: uri_folder
+        name: "finetuned_model" # Define name and version to register a child job's output
+        version: "1"
     code: ../src
     environment: azureml:codegen_env@latest
     compute: azureml:cpu-cheap
@@ -38,9 +40,6 @@ jobs:
     inputs:
       #checkpoint: "stanford-crfm/alias-gpt2-small-x21"
       checkpoint: "Salesforce/codegen-350M-mono"
-      data:
-        type: uri_file
-        path: azureml:functions:1
       model_folder: ${{parent.jobs.finetune.outputs.model}}
     outputs:
       output_dir:
@@ -49,5 +48,5 @@ jobs:
     environment: azureml:codegen_env@latest
     compute: azureml:cpu-cheap
     command: >-
-      python predict.py --checkpoint ${{inputs.checkpoint}} --test_data_path ${{inputs.data}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
+      python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
 
