@@ -1,5 +1,7 @@
 import argparse
 import logging
+import pickle
+import os
 import sys
 
 import datasets
@@ -38,7 +40,11 @@ def generate_text(prompt, model_, tok_, device, **kwargs):
 
 def main(args):
     checkpoint = args.checkpoint
-    test_data_path = args.test_data_path
+    # test_data_path = args.test_data_path
+    # metrics_path = args.metrics_path
+    # baseline_preds_path = args.baseline_preds_path
+    model_folder = args.model_folder
+    output_dir = args.output_dir
 
     handler = logging.StreamHandler()
     logger = logging.getLogger(__name__)
@@ -47,56 +53,48 @@ def main(args):
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    logger.info('Load finetuned model')
+    model_finetuned = AutoModelForCausalLM.from_pretrained(model_folder,
+                                                           device_map="auto")
     logger.info('Load tokenizer and model from HF')
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
     tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(
         checkpoint, trust_remote_code=True).to(device)
 
-    # !!! Then modify this to do it an elegant way
-    text1_predict_bfinetune = generate_text(prompt[0],
-                                            model,
-                                            tokenizer,
-                                            device,
-                                            repetition_penalty=50.0,
-                                            max_new_tokens=1000)
-    text2_predict_bfinetune = generate_text(prompt[1],
-                                            model,
-                                            tokenizer,
-                                            device,
-                                            repetition_penalty=50.0,
-                                            max_new_tokens=1000)
-    text3_predict_bfinetune = generate_text(prompt[2],
-                                            model,
-                                            tokenizer,
-                                            device,
-                                            repetition_penalty=50.0,
-                                            max_new_tokens=1000)
+    baseline_predictions = list(
+        map(
+            lambda text: generate_text(text,
+                                       model,
+                                       tokenizer,
+                                       device,
+                                       repetition_penalty=50.0,
+                                       max_new_tokens=1000), prompt))
 
     bleu = evaluate.load("bleu")
-    bleu_results = bleu.compute(predictions=[
-        text1_predict_bfinetune, text2_predict_bfinetune,
-        text3_predict_bfinetune
-    ],
+    bleu_results = bleu.compute(predictions=baseline_predictions,
                                 references=answer)
-    logger.info(bleu_results)
-    # !!! Where to save these results ?
-
     chrf = evaluate.load("chrf")
-    chrf_results = chrf.compute(predictions=[
-        text1_predict_bfinetune, text2_predict_bfinetune,
-        text3_predict_bfinetune
-    ],
+    chrf_results = chrf.compute(predictions=baseline_predictions,
                                 references=answer)
-    logger.info(chrf_results)
+    metrics = {'bleu': bleu_results, 'chrf': chrf_results}
 
-    # !!! Where to save predictions for examination?
+    logger.info(f'Saving to {os.getcwd()}')
+    with open(output_dir + '/metrics.pkl', 'wb') as f:
+        pickle.dump(metrics, f)
+
+    # with open(output_path + '/baseline_preds.pkl', 'wb') as f:
+    #     pickle.dump(baseline_predictions, f)
 
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str)
     parser.add_argument("--test_data_path", type=str)
+    # parser.add_argument("--metrics_path", type=str)
+    # parser.add_argument("--baseline_preds_path", type=str)
+    parser.add_argument("--model_folder", type=str)
+    parser.add_argument("--output_dir", type=str)
     args = parser.parse_args()
 
     return args

@@ -45,7 +45,7 @@ def main(args):
     data_path = args.data_path
     batch_size = args.batch_size
     seq_length = args.seq_length
-    #model_dir = args.model_dir
+    model_dir = args.model_dir
 
     handler = logging.StreamHandler()
     logger = logging.getLogger(__name__)
@@ -79,7 +79,8 @@ def main(args):
     # Data collator - Assembles data into batches for training
     data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
 
-    training_args = TrainingArguments(output_dir='./outputs_' + checkpoint,
+    #training_args = TrainingArguments(output_dir='./output',
+    training_args = TrainingArguments(output_dir=model_dir,
                                       gradient_checkpointing=True,
                                       evaluation_strategy="epoch",
                                       num_train_epochs=1)
@@ -102,8 +103,9 @@ def main(args):
 
     trainer.save_model()
 
-    model_files = os.listdir(trainer.args.output_dir)
-    print("Model files in output directory:", model_files)
+    # model_files = os.listdir(trainer.args.output_dir)
+    # print("Output directory:", trainer.args.output_dir)
+    # print("Model files in output directory:", model_files)
 
 
 def parse_args():
@@ -112,7 +114,7 @@ def parse_args():
     parser.add_argument("--data_path", type=str)
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--seq_length", type=int)
-    #parser.add_argument("--model_dir", type=str)
+    parser.add_argument("--model_dir", type=str)
     args = parser.parse_args()
 
     return args

@@ -5,6 +5,13 @@ description: Finetuning pipeline for code generation
 
 display_name: code-finetune-pipeline
 experiment_name: code-finetune-pipeline
+# outputs:
+#   metrics:
+#     type: uri_file
+#     mode: rw_mount
+#   baseline_preds:
+#     type: uri_file
+#     mode: rw_mount
 jobs:
   finetune:
     type: command
@@ -16,26 +23,31 @@ jobs:
         path: azureml:functions:1
       batch_size: 20
       seq_length: 100
-    # outputs:
-    #   model:
-    #     type: mlflow_model
+    outputs:
+      model:
+        type: uri_folder
     code: ../src
     environment: azureml:codegen_env@latest
     compute: azureml:cpu-cheap
     command: >-
-      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}}
+      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --model_dir ${{outputs.model}}
 
 
   predict:
     type: command
     inputs:
-      checkpoint: "stanford-crfm/alias-gpt2-small-x21"
+      #checkpoint: "stanford-crfm/alias-gpt2-small-x21"
+      checkpoint: "Salesforce/codegen-350M-mono"
       data:
         type: uri_file
-        path: azureml:test_functions:1
+        path: azureml:functions:1
+      model_folder: ${{parent.jobs.finetune.outputs.model}}
+    outputs:
+      output_dir:
+        type: uri_folder
     code: ../src
     environment: azureml:codegen_env@latest
     compute: azureml:cpu-cheap
     command: >-
-      python predict.py --checkpoint ${{inputs.checkpoint}} --test_data_path ${{inputs.test_data_path}}
+      python predict.py --checkpoint ${{inputs.checkpoint}} --test_data_path ${{inputs.data}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
 
