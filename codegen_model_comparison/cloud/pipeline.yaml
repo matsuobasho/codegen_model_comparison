@@ -8,33 +8,30 @@ experiment_name: code-finetune-pipeline
 outputs:
   model:
     type: uri_folder
-    mode: rw_mount
-  metrics:
-    type: uri_file
-    mode: rw_mount
-  baseline_preds:
-    type: uri_file
-    mode: rw_mount
+  output_dir:
+    type: uri_folder
 jobs:
   finetune_codegen:
     type: command
     inputs:
-      checkpoint: "Salesforce/codegen-350M-mono"
+      checkpoint: "stanford-crfm/alias-gpt2-small-x21"
+      #checkpoint: "Salesforce/codegen-350M-mono"
       data:
         type: uri_file
         path: azureml:functions:1
       batch_size: 20
-      seq_length: 500
+      seq_length: 50
     outputs:
       model_codegen:
-        type: uri_folder
+        ${{parent.outputs.model}}
+        # type: uri_folder
         # name: "finetuned_model" # Define name and version to register a child job's output
         # version: "1"
     code: ../src
     environment: azureml:codegen_env@latest
     compute: azureml:cpu-cheap
     command: >-
-      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --model_dir ${{outputs.model}}
+      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --model_dir ${{outputs.model_codegen}}
 
 
   predict_codegen:
@@ -42,48 +39,46 @@ jobs:
     inputs:
       #checkpoint: "stanford-crfm/alias-gpt2-small-x21"
       checkpoint: "Salesforce/codegen-350M-mono"
-      model_folder: ${{parent.jobs.finetune_codegen.outputs_codegen.model}}
+      model_folder: ${{parent.jobs.finetune_codegen.outputs.model_codegen}}
     outputs:
       output_dir_codegen:
-        type: uri_folder
+        ${{parent.outputs.output_dir}}
+        #type: uri_folder
     code: ../src
     environment: azureml:codegen_env@latest
     compute: azureml:cpu-cheap
     command: >-
       python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir_codegen}}
 
-
-  finetune_deci:
-    type: command
-    inputs:
-      checkpoint: "Deci/DeciCoder-1b"
-      data:
-        type: uri_file
-        path: azureml:functions:1
-      batch_size: 20
-      seq_length: 500
-    outputs:
-      model_deci:
-        type: uri_folder
-        #name: "finetuned_model" # Define name and version to register a child job's output
-        #version: "1"
-    code: ../src
-    environment: azureml:codegen_env@latest
-    compute: azureml:cpu-cheap
-    command: >-
-      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --model_dir ${{outputs.model}}
-
-  predict_deci:
-    type: command
-    inputs:
-      checkpoint: "Deci/DeciCoder-1b"
-      model_folder: ${{parent.jobs.finetune_deci.outputs.model_deci}}
-    outputs:
-      output_dir_deci:
-        type: uri_folder
-    code: ../src
-    environment: azureml:codegen_env@latest
-    compute: azureml:cpu-cheap
-    command: >-
-      python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir_deci}}
-
+  # finetune_deci:
+  #   type: command
+  #   inputs:
+  #     checkpoint: "Deci/DeciCoder-1b"
+  #     data:
+  #       type: uri_file
+  #       path: azureml:functions:1
+  #     batch_size: 20
+  #     seq_length: 500
+  #   outputs:
+  #     model_deci:
+  #       type: uri_folder
+  #       #name: "finetuned_model" # Define name and version to register a child job's output
+  #       #version: "1"
+  #   code: ../src
+  #   environment: azureml:codegen_env@latest
+  #   compute: azureml:cpu-cheap
+  #   command: >-
+  #     python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --model_dir ${{outputs.model}}
+  # predict_deci:
+  #   type: command
+  #   inputs:
+  #     checkpoint: "Deci/DeciCoder-1b"
+  #     model_folder: ${{parent.jobs.finetune_deci.outputs.model_deci}}
+  #   outputs:
+  #     output_dir_deci:
+  #       type: uri_folder
+  #   code: ../src
+  #   environment: azureml:codegen_env@latest
+  #   compute: azureml:cpu-cheap
+  #   command: >-
+  #     python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir_deci}}
