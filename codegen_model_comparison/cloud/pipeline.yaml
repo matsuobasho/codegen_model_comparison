@@ -5,25 +5,36 @@ description: Finetuning pipeline for code generation
 
 display_name: code-finetune-pipeline
 experiment_name: code-finetune-pipeline
+inputs:
+  data:
+    type: uri_file
+    path: azureml:functions:1
+  batch_size: 10
+  seq_length: 30
+  checkpoint1: "stanford-crfm/alias-gpt2-small-x21"
+  #checkpoint1: "Salesforce/codegen-350M-mono"
+  #checkpoint2: "Deci/DeciCoder-1b"
 outputs:
-  model:
+  model1:
     type: uri_folder
-  output_dir:
+  # model_output2:
+  #   type: uri_folder
+  results1:
     type: uri_folder
+  # output_dir2:
+  #   type: uri_folder
 jobs:
   finetune_codegen:
     type: command
     inputs:
-      checkpoint: "stanford-crfm/alias-gpt2-small-x21"
+      checkpoint: ${{parent.inputs.checkpoint1}}
       #checkpoint: "Salesforce/codegen-350M-mono"
-      data:
-        type: uri_file
-        path: azureml:functions:1
-      batch_size: 20
-      seq_length: 50
+      data: ${{parent.inputs.data}}
+      batch_size: ${{parent.inputs.batch_size}}
+      seq_length: ${{parent.inputs.seq_length}}
     outputs:
       model_codegen:
-        ${{parent.outputs.model}}
+        ${{parent.outputs.model1}}
         # type: uri_folder
         # name: "finetuned_model" # Define name and version to register a child job's output
         # version: "1"
@@ -37,12 +48,11 @@ jobs:
   predict_codegen:
     type: command
     inputs:
-      #checkpoint: "stanford-crfm/alias-gpt2-small-x21"
-      checkpoint: "Salesforce/codegen-350M-mono"
+      checkpoint: ${{parent.inputs.checkpoint1}}
       model_folder: ${{parent.jobs.finetune_codegen.outputs.model_codegen}}
     outputs:
       output_dir_codegen:
-        ${{parent.outputs.output_dir}}
+        ${{parent.outputs.results1}}
         #type: uri_folder
     code: ../src
     environment: azureml:codegen_env@latest
