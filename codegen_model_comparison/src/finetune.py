@@ -45,6 +45,7 @@ def main(args):
     data_path = args.data_path
     batch_size = args.batch_size
     seq_length = args.seq_length
+    epochs = args.epochs
     model_dir = args.model_dir
 
     handler = logging.StreamHandler()
@@ -83,7 +84,7 @@ def main(args):
     training_args = TrainingArguments(output_dir=model_dir,
                                       gradient_checkpointing=True,
                                       evaluation_strategy="epoch",
-                                      num_train_epochs=1)
+                                      num_train_epochs=epochs)
 
     bleu = evaluate.load("bleu")
 
@@ -103,10 +104,6 @@ def main(args):
 
     trainer.save_model()
 
-    # model_files = os.listdir(trainer.args.output_dir)
-    # print("Output directory:", trainer.args.output_dir)
-    # print("Model files in output directory:", model_files)
-
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -114,6 +111,7 @@ def parse_args():
     parser.add_argument("--data_path", type=str)
     parser.add_argument("--batch_size", type=int)
     parser.add_argument("--seq_length", type=int)
+    parser.add_argument("--epochs", type=int)
     parser.add_argument("--model_dir", type=str)
     args = parser.parse_args()
 
