@@ -40,7 +40,7 @@ def add_labels(example):
 #     return {'bleu_score': res['bleu']}
 
 
-def compute_chrf_score(preds):
+def compute_chrf_score(preds, tokenizer, metric):
     logits = preds.predictions[0]
     preds_tok = np.argmax(logits, axis=1)
     acts = preds.label_ids
@@ -49,7 +49,8 @@ def compute_chrf_score(preds):
                                                 skip_special_tokens=True)
     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
 
-    res = chrf.compute(predictions=decode_predictions, references=decode_labels)
+    res = metric.compute(predictions=decode_predictions,
+                         references=decode_labels)
     return {'chrf_score': res['score']}
 
 
@@ -118,6 +119,8 @@ def main(args):
     #bleu = evaluate.load("bleu")
     chrf = evaluate.load("chrf")
 
+    compute_metric_partial = partial(compute_chrf_score, tokenizer, chrf)
+
     logger.info('Finetune model')
     with mlflow.start_run():
         mlflow.transformers.autolog(log_models=False)
@@ -126,7 +129,7 @@ def main(args):
                           train_dataset=tokenized_dataset['train'],
                           eval_dataset=tokenized_dataset['test'],
                           data_collator=data_collator,
-                          compute_metrics=compute_chrf_score,
+                          compute_metrics=compute_metric_partial,
                           tokenizer=tokenizer)
 
     trainer.train()
