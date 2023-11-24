@@ -50,7 +50,7 @@ def compute_chrf_score(preds):
     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
 
     res = chrf.compute(predictions=decode_predictions, references=decode_labels)
-    return {'bleu_score': res['bleu']}
+    return {'chrf_score': res['score']}
 
 
 def main(args):
@@ -74,7 +74,22 @@ def main(args):
 
     logger.info('Load tokenizer and model from HF')
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
-    tokenizer.pad_token = tokenizer.eos_token
+
+    if 'deci' in str.lower(checkpoint):
+        FIM_PREFIX = "<fim_prefix>"
+        FIM_MIDDLE = "<fim_middle>"
+        FIM_SUFFIX = "<fim_suffix>"
+        FIM_PAD = "<fim_pad>"
+        EOD = "<|endoftext|>"
+
+        tokenizer.add_special_tokens({
+            "additional_special_tokens": [
+                EOD, FIM_PREFIX, FIM_MIDDLE, FIM_SUFFIX, FIM_PAD
+            ],
+            "pad_token": EOD,
+    }) else:
+        tokenizer.pad_token = tokenizer.eos_token
+
     model = AutoModelForCausalLM.from_pretrained(
         checkpoint, trust_remote_code=True).to(device)
 
