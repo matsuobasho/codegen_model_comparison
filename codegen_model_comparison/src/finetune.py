@@ -6,7 +6,7 @@ import pickle
 
 import datasets
 import evaluate
-#import mlflow
+import mlflow
 import numpy as np
 import torch
 from transformers import (AutoModelForCausalLM, AutoTokenizer,
@@ -38,6 +38,19 @@ def add_labels(example):
 
 #     res = bleu.compute(predictions=decode_predictions, references=decode_labels)
 #     return {'bleu_score': res['bleu']}
+
+
+def compute_chrf_score(preds):
+    logits = preds.predictions[0]
+    preds_tok = np.argmax(logits, axis=2)
+    acts = preds.label_ids
+
+    decode_predictions = tokenizer.batch_decode(preds_tok,
+                                                skip_special_tokens=True)
+    decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
+
+    res = chrf.compute(predictions=decode_predictions, references=decode_labels)
+    return {'bleu_score': res['bleu']}
 
 
 def main(args):
@@ -86,19 +99,19 @@ def main(args):
                                       evaluation_strategy="epoch",
                                       num_train_epochs=epochs)
 
-    bleu = evaluate.load("bleu")
+    #bleu = evaluate.load("bleu")
+    chrf = evaluate.load("chrf")
 
     logger.info('Finetune model')
-    #with mlflow.start_run():
-    #mlflow.transformers.autolog(log_models=False)
-    trainer = Trainer(
-        model,
-        training_args,
-        train_dataset=tokenized_dataset['train'],
-        eval_dataset=tokenized_dataset['test'],
-        data_collator=data_collator,
-        #compute_metrics=compute_bleu_score,
-        tokenizer=tokenizer)
+    with mlflow.start_run():
+        mlflow.transformers.autolog(log_models=False)
+        trainer = Trainer(model,
+                          training_args,
+                          train_dataset=tokenized_dataset['train'],
+                          eval_dataset=tokenized_dataset['test'],
+                          data_collator=data_collator,
+                          compute_metrics=compute_chrf_score,
+                          tokenizer=tokenizer)
 
     trainer.train()
 
