@@ -27,20 +27,7 @@ def add_labels(example):
     return example
 
 
-# def compute_bleu_score(preds):
-#     logits = preds.predictions[0]
-#     preds_tok = np.argmax(logits, axis=2)
-#     acts = preds.label_ids
-
-#     decode_predictions = tokenizer.batch_decode(preds_tok,
-#                                                 skip_special_tokens=True)
-#     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
-
-#     res = bleu.compute(predictions=decode_predictions, references=decode_labels)
-#     return {'bleu_score': res['bleu']}
-
-
-def compute_chrf_score(preds):
+def compute_bleu_score(preds):
     logits = preds.predictions[0]
     preds_tok = np.argmax(logits, axis=2)
     acts = preds.label_ids
@@ -49,8 +36,21 @@ def compute_chrf_score(preds):
                                                 skip_special_tokens=True)
     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
 
-    res = chrf.compute(predictions=decode_predictions, references=decode_labels)
-    return {'chrf_score': res['score']}
+    res = bleu.compute(predictions=decode_predictions, references=decode_labels)
+    return {'bleu_score': res['bleu']}
+
+
+# def compute_chrf_score(preds):
+#     logits = preds.predictions[0]
+#     preds_tok = np.argmax(logits, axis=2)
+#     acts = preds.label_ids
+
+#     decode_predictions = tokenizer.batch_decode(preds_tok,
+#                                                 skip_special_tokens=True)
+#     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
+
+#     res = chrf.compute(predictions=decode_predictions, references=decode_labels)
+#     return {'chrf_score': res['score']}
 
 
 def main(args):
@@ -87,7 +87,8 @@ def main(args):
                 EOD, FIM_PREFIX, FIM_MIDDLE, FIM_SUFFIX, FIM_PAD
             ],
             "pad_token": EOD,
-    }) else:
+        })
+    else:
         tokenizer.pad_token = tokenizer.eos_token
 
     model = AutoModelForCausalLM.from_pretrained(
@@ -114,8 +115,8 @@ def main(args):
                                       evaluation_strategy="epoch",
                                       num_train_epochs=epochs)
 
-    #bleu = evaluate.load("bleu")
-    chrf = evaluate.load("chrf")
+    bleu = evaluate.load("bleu")
+    #chrf = evaluate.load("chrf")
 
     logger.info('Finetune model')
     with mlflow.start_run():
@@ -125,7 +126,7 @@ def main(args):
                           train_dataset=tokenized_dataset['train'],
                           eval_dataset=tokenized_dataset['test'],
                           data_collator=data_collator,
-                          compute_metrics=compute_chrf_score,
+                          compute_metrics=compute_bleu_score,
                           tokenizer=tokenizer)
 
     trainer.train()
