@@ -13,6 +13,11 @@ inputs:
   mlflow_model_path:
     path: azureml://registries/azureml-meta/models/CodeLlama-7b-hf/versions/3
 
+  compute_model_import: gpu-expensive
+  compute_preprocess: gpu-expensive
+  compute_finetune: gpu-expensive
+  compute_model_evaluation: gpu-expensive
+
   # map the dataset files to parameters
   train_file_path:
     type: uri_file
@@ -20,7 +25,7 @@ inputs:
     path: "../data/codellama_train.jsonl"
   validation_file_path:
     type: uri_file
-    path: "../data/codellama_test.jsonl"
+    path: "../data/codellama_val.jsonl"
   test_file_path:
     type: uri_file
     path: "../data/codellama_test.jsonl"
@@ -55,10 +60,10 @@ jobs:
     inputs:
       mlflow_model_path: ${{parent.inputs.mlflow_model_path}}
 
-      # compute_model_import: ${{parent.inputs.compute_model_import}}
-      # compute_preprocess: ${{parent.inputs.compute_preprocess}}
-      # compute_finetune: ${{parent.inputs.compute_finetune}}
-      # compute_model_evaluation: ${{parent.inputs.compute_model_evaluation}}
+      compute_model_import: ${{parent.inputs.compute_model_import}}
+      compute_preprocess: ${{parent.inputs.compute_preprocess}}
+      compute_finetune: ${{parent.inputs.compute_finetune}}
+      compute_model_evaluation: ${{parent.inputs.compute_model_evaluation}}
 
       train_file_path: ${{parent.inputs.train_file_path}}
       validation_file_path: ${{parent.inputs.validation_file_path}}
