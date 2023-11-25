@@ -1,40 +1,39 @@
 $schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
 type: pipeline
 
-experiment_name: text-generation-samsum
+experiment_name: codellama-codegen
+
+settings:
+  default_compute: azureml:gpu-epensive
+  force_rerun: true
+  continue_on_step_failure: false
 
 inputs:
-  compute_model_import: gpu-cluster-big
-  compute_preprocess: gpu-cluster-big
-  compute_finetune: gpu-cluster-big
-  compute_model_evaluation: gpu-cluster-big
-
   # specify the foundation model available in the azureml system registry
   mlflow_model_path:
-    path: azureml://registries/azureml/models/Llama-2-7b/versions/5
-
-  # huggingface_id: 'gpt2' # if you want to use a huggingface model, uncomment this line and comment the above lines
+    path: azureml://registries/azureml-meta/models/CodeLlama-7b-hf/versions/3
 
   # map the dataset files to parameters
   train_file_path:
     type: uri_file
+    # can't tell if we can actually just uploade from local?
     path: "samsum-dataset/small_train.jsonl"
   validation_file_path:
     type: uri_file
-    path: "samsum-dataset/small_validation.jsonl"
+    path: ""
   test_file_path:
     type: uri_file
-    path: "samsum-dataset/small_test.jsonl"
+    path: ""
 
   # The following parameters map to the dataset fields
-  text_key: "text"
-  ground_truth_key: "summary"
+  text_key: "docstring"
+  ground_truth_key: "function"
 
   # training settings
-  number_of_gpu_to_use_finetuning: 8
+  number_of_gpu_to_use_finetuning: 1
   num_train_epochs: 3
-  per_device_train_batch_size: 1
-  per_device_eval_batch_size: 1
+  per_device_train_batch_size: 5
+  per_device_eval_batch_size: 5
   learning_rate: 2e-5
 
   # optimization params
@@ -49,10 +48,6 @@ outputs:
   trained_model:
     type: mlflow_model
 
-settings:
-  force_rerun: true
-  continue_on_step_failure: false
-
 jobs:
   text_generation_pipeline:
     type: pipeline
@@ -60,10 +55,10 @@ jobs:
     inputs:
       mlflow_model_path: ${{parent.inputs.mlflow_model_path}}
 
-      compute_model_import: ${{parent.inputs.compute_model_import}}
-      compute_preprocess: ${{parent.inputs.compute_preprocess}}
-      compute_finetune: ${{parent.inputs.compute_finetune}}
-      compute_model_evaluation: ${{parent.inputs.compute_model_evaluation}}
+      # compute_model_import: ${{parent.inputs.compute_model_import}}
+      # compute_preprocess: ${{parent.inputs.compute_preprocess}}
+      # compute_finetune: ${{parent.inputs.compute_finetune}}
+      # compute_model_evaluation: ${{parent.inputs.compute_model_evaluation}}
 
       train_file_path: ${{parent.inputs.train_file_path}}
       validation_file_path: ${{parent.inputs.validation_file_path}}
