@@ -17,13 +17,13 @@ inputs:
   train_file_path:
     type: uri_file
     # can't tell if we can actually just uploade from local?
-    path: "samsum-dataset/small_train.jsonl"
+    path: "../data/codellama_train.jsonl"
   validation_file_path:
     type: uri_file
-    path: ""
+    path: "../data/codellama_test.jsonl"
   test_file_path:
     type: uri_file
-    path: ""
+    path: "../data/codellama_test.jsonl"
 
   # The following parameters map to the dataset fields
   text_key: "docstring"
