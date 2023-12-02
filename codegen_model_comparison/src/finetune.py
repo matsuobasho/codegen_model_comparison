@@ -96,9 +96,9 @@ def main(args):
                           compute_metrics=compute_metric_partial,
                           tokenizer=tokenizer)
 
-    trainer.train()
+        trainer.train()
 
-    trainer.save_model()
+        trainer.save_model()
 
 
 def parse_args():
