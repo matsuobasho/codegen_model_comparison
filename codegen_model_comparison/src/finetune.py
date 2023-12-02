@@ -12,46 +12,7 @@ import torch
 from transformers import (AutoModelForCausalLM, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments)
 
-
-def tokenize_function(example, tokenizer, seq_length):
-    return tokenizer(
-        example['text'],
-        padding="max_length",
-        truncation=True,
-        max_length=seq_length,
-    )
-
-
-def add_labels(example):
-    example['label'] = example['input_ids']
-    return example
-
-
-# def compute_bleu_score(preds):
-#     logits = preds.predictions[0]
-#     preds_tok = np.argmax(logits, axis=1)
-#     acts = preds.label_ids
-
-#     decode_predictions = tokenizer.batch_decode(preds_tok,
-#                                                 skip_special_tokens=True)
-#     decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
-
-#     res = bleu.compute(predictions=decode_predictions, references=decode_labels)
-#     return {'bleu_score': res['bleu']}
-
-
-def compute_chrf_score(preds, tokenizer, metric):
-    logits = preds.predictions[0]
-    preds_tok = np.argmax(logits, axis=1)
-    acts = preds.label_ids
-
-    decode_predictions = tokenizer.batch_decode(preds_tok,
-                                                skip_special_tokens=True)
-    decode_labels = tokenizer.batch_decode(acts, skip_special_tokens=True)
-
-    res = metric.compute(predictions=decode_predictions,
-                         references=decode_labels)
-    return {'chrf_score': res['score']}
+import funcs
 
 
 def main(args):
@@ -96,14 +57,14 @@ def main(args):
         checkpoint, trust_remote_code=True).to(device)
 
     logger.info('Tokenize data')
-    tokenize_partial = partial(tokenize_function,
+    tokenize_partial = partial(funcs.tokenize_function,
                                tokenizer=tokenizer,
                                seq_length=seq_length)
 
     tokenized_dataset = data.map(tokenize_partial,
                                  batched=True,
                                  batch_size=batch_size).map(
-                                     add_labels,
+                                     funcs.add_labels,
                                      batched=True,
                                      batch_size=batch_size)
 
@@ -119,7 +80,10 @@ def main(args):
     #bleu = evaluate.load("bleu")
     chrf = evaluate.load("chrf")
 
-    compute_metric_partial = partial(compute_chrf_score, tokenizer, chrf)
+    #compute_metric_partial = partial(compute_bleu_score, tokenizer = tokenizer, metric = chrf)
+    compute_metric_partial = partial(funcs.compute_chrf_score,
+                                     tokenizer=tokenizer,
+                                     metric=chrf)
 
     logger.info('Finetune model')
     with mlflow.start_run():
