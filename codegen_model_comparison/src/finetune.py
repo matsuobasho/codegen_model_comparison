@@ -5,7 +5,7 @@ import os
 import pickle
 
 import datasets
-import evaluate
+#import evaluate
 import mlflow
 import numpy as np
 import torch
@@ -78,12 +78,14 @@ def main(args):
                                       num_train_epochs=epochs)
 
     #bleu = evaluate.load("bleu")
-    chrf = evaluate.load("chrf")
+    #chrf = evaluate.load("chrf")
 
     #compute_metric_partial = partial(compute_bleu_score, tokenizer = tokenizer, metric = chrf)
-    compute_metric_partial = partial(funcs.compute_chrf_score,
-                                     tokenizer=tokenizer,
-                                     metric=chrf)
+    # compute_metric_partial = partial(funcs.compute_chrf_score,
+    #                                  tokenizer=tokenizer,
+    #                                  metric=chrf)
+
+    compute_metrics_partial = partial(funcs.compute_metric, tokenizer=tokenizer)
 
     logger.info('Finetune model')
     with mlflow.start_run():
@@ -93,7 +95,7 @@ def main(args):
                           train_dataset=tokenized_dataset['train'],
                           eval_dataset=tokenized_dataset['test'],
                           data_collator=data_collator,
-                          compute_metrics=compute_metric_partial,
+                          compute_metrics=compute_metrics_partial,
                           tokenizer=tokenizer)
 
         trainer.train()
