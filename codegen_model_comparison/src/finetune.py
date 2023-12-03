@@ -85,7 +85,8 @@ def main(args):
     #                                  tokenizer=tokenizer,
     #                                  metric=chrf)
 
-    compute_metrics_partial = partial(funcs.compute_metric, tokenizer=tokenizer)
+    compute_metrics_partial = partial(funcs.compute_metrics,
+                                      tokenizer=tokenizer)
 
     logger.info('Finetune model')
     with mlflow.start_run():
