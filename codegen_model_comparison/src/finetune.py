@@ -33,6 +33,7 @@ def main(args):
         data = pickle.load(f)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    fp16_flag = True if torch.cuda.is_available() else False
 
     logger.info('Load tokenizer and model from HF')
     tokenizer = AutoTokenizer.from_pretrained(checkpoint)
@@ -75,6 +76,7 @@ def main(args):
     training_args = TrainingArguments(output_dir=model_dir,
                                       gradient_checkpointing=True,
                                       evaluation_strategy="epoch",
+                                      fp16=fp16_flag,
                                       num_train_epochs=epochs)
 
     #bleu = evaluate.load("bleu")
@@ -86,7 +88,8 @@ def main(args):
     #                                  metric=chrf)
 
     compute_metrics_partial = partial(funcs.compute_metrics,
-                                      tokenizer=tokenizer)
+                                      tokenizer=tokenizer,
+                                      checkpoint=checkpoint)
 
     logger.info('Finetune model')
     with mlflow.start_run():

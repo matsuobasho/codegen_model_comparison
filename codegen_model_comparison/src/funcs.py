@@ -44,7 +44,7 @@ def compute_chrf_score(preds, tokenizer, metric):
     return {'chrf_score': res['score']}
 
 
-def compute_metrics(preds, tokenizer):
+def compute_metrics(preds, tokenizer, checkpoint):
     """Compute Bleu and ChrF metrics.
 
     Parameters
@@ -59,8 +59,13 @@ def compute_metrics(preds, tokenizer):
     _type_
         _description_
     """
-    logits = preds.predictions[0]
-    preds_tok = np.argmax(logits, axis=1)
+    if 'codegen' in checkpoint:
+        # in codegen, preds is a tuple
+        logits = preds.predictions[0]
+    else:
+        ## In Decicoder, predictions is already an array
+        logits = preds
+    preds_tok = np.argmax(logits, axis=2)
     acts = preds.label_ids
 
     decode_predictions = tokenizer.batch_decode(preds_tok,
