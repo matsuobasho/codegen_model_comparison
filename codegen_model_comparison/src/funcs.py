@@ -64,7 +64,7 @@ def compute_metrics(preds, tokenizer, checkpoint):
         logits = preds.predictions[0]
     else:
         ## In Decicoder, predictions is already an array
-        logits = preds
+        logits = preds.predictions
     preds_tok = np.argmax(logits, axis=2)
     acts = preds.label_ids
 
