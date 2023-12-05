@@ -6,18 +6,18 @@ take at least a first pass at writing it for me."
 
 Large language models have gotten a lot of attention in 2023 (from hereon just referred
 to as LMs).  So the idea was to see how well these LMs, finetuned on
-our company's codebase, perform on a much more simplifed task.
+our company's codebase, perform on a much more simplified task.
 
 First to get it out the way, I am of course familiar of course with Github Copilot.
 But Copilot is paid, and I would also like control over the internals
-of the LMs as opposed to just having a black box.  Relying on a copmany,
+of the LMs as opposed to just having a black box.  Relying on a company,
 as the saga with OpenAI in the past couple of weeks has reminded the world,
 can give you a false sense of confidence.
 
 Designing a system to create interrelated blocks of code that integrate into
 a functioning codebase in response to a user command is a very difficult
 experiment, so I limited the scope to something much more
-managebale.  Namely, generating detailed code from Python function documentation
+manageable.  Namely, generating detailed code from Python function documentation
 (from hereon referred to as docstrings).
 
 
@@ -38,7 +38,7 @@ does, to generate the function itself.
 ## The questions
 So I wanted to know:
 * What LMs can we test?
-* How much do they improve if we finetuned them as oppoosed to just using
+* How much do they improve if we finetuned them as opposed to just using
     them out of the box?
 * How good (or bad) is the code they generate?  Does it even run?
 
