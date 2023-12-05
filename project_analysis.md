@@ -1,8 +1,8 @@
 ## Introduction
-One Friday afternoon, while planning the software development work for the
-following week, a thought crossed my mind, "Wouldn't it be nice if I could
-issue a set of instructions about the intended feature and have the machine
-take at least a first pass at writing it for me."
+One Friday afternoon, while planning the following week's software development
+work, a thought crossed my mind, "Wouldn't it be nice if I could issue a set of
+instructions about the intended feature and have the machine take at least a
+first pass at writing it for me."
 
 Large language models have gotten a lot of attention in 2023 (from hereon just referred
 to as LMs).  So the idea was to see how well these LMs, finetuned on
@@ -15,22 +15,23 @@ as the saga with OpenAI in the past couple of weeks has reminded the world,
 can give you a false sense of confidence.
 
 Designing a system to create interrelated blocks of code that integrate into
-a functioning codebase in response to a user command is a very difficult
-experiment, so I limited the scope to something much more
+a functioning codebase in response to a user command is a very challenging
+endeavor, so I limited the scope to something much more
 manageable.  Namely, generating detailed code from Python function documentation
 (from hereon referred to as docstrings).
 
 
 ## Data
-In our codebase, we strive to adhere to standards for both our docstrings
-and the Python functions.  Every docstring has at the minimum the same sections with a
-description of what it does, inputs and outputs.  Additionally, we intentionally
-included layperson-friendly explanations of the engineering and solar concepts pertinent to a
-function.
+In our codebase, we strive to adhere to standards for both our docstrings and
+the Python functions.  Every docstring has at the minimum the same sections with
+a description of what the function does along with its inputs and outputs.
+We intentionally write layperson-friendly explanations of the
+pertinent engineering and solar concepts (although we won't repeat these
+detailed explanations across functions).
 
-Although the code itself doesn't have the same rigid structure, we strive for
-a convention for variable names, a certain coding style (Pandas/numpy heavy
-vectorization, writing for humans), and adhere to the Google coding standard.
+In our code, we follow the Google coding standard.  We strive for
+a convention for variable names, a certain coding style (i.e. Pandas/numpy heavy
+vectorization, writing for humans).
 
 So we can use the docstrings, which in essence describe what the function
 does, to generate the function itself.
@@ -43,7 +44,7 @@ So I wanted to know:
 * How good (or bad) is the code they generate?  Does it even run?
 
 ## Models
-We decided on the following 3:
+I decided to use the following models:
 * SalesForce Codegen 350M
     * 350 million parameters
     * Trained on 71.8B Python tokens
@@ -58,8 +59,8 @@ Model-training details would go here.
 ## Baseline predictions
 
 I chose 3 functions that represent the range of complexity within our code.
-I will share 2 of them (the 3rd one has our secret sauce for quantifying
-dealing with uncertainty in energy losses).
+I will share 2 of them (the 3rd one has our secret sauce for uncertainty
+quantification in energy losses).
 
 There are adjustable parameters with the generation phase that one can tweak
 as well.  Here, we used !!! talk about what was ued.
