@@ -5,11 +5,18 @@ import os
 import pickle
 
 import datasets
-#import evaluate
 import mlflow
 import numpy as np
+from peft import (
+    LoraConfig,
+    get_peft_model,
+    get_peft_model_state_dict,
+    prepare_model_for_int8_training,
+    set_peft_model_state_dict,
+    PeftModel
+)
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer,
+from transformers import (AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig,
                           DataCollatorWithPadding, Trainer, TrainingArguments)
 
 import funcs
