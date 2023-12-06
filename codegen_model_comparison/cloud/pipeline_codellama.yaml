@@ -4,7 +4,6 @@ type: pipeline
 experiment_name: codellama-codegen
 
 settings:
-  default_compute: azureml:gpu-epensive
   force_rerun: true
   continue_on_step_failure: false
 
@@ -13,10 +12,10 @@ inputs:
   mlflow_model_path:
     path: azureml://registries/azureml-meta/models/CodeLlama-7b-hf/versions/3
 
-  compute_model_import: gpu-expensive
-  compute_preprocess: gpu-expensive
-  compute_finetune: gpu-expensive
-  compute_model_evaluation: gpu-expensive
+  #compute_model_import: GPU-mid
+  #compute_preprocess: GPU-mid
+  # compute_finetune: gpu-mid
+  # compute_model_evaluation: gpu-expensive
 
   # map the dataset files to parameters
   train_file_path:
@@ -33,13 +32,18 @@ inputs:
   # The following parameters map to the dataset fields
   text_key: "docstring"
   ground_truth_key: "function"
+  batch_size: 5
+  pad_to_max_seq_length: true
+  max_seq_length: 500
 
   # training settings
   number_of_gpu_to_use_finetuning: 1
-  num_train_epochs: 3
-  per_device_train_batch_size: 5
-  per_device_eval_batch_size: 5
+  num_train_epochs: 4
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
   learning_rate: 2e-5
+  gradient_accumulation_steps: 5
+  eval_accumulation_steps: 5
 
   # optimization params
   apply_lora: "true"
@@ -60,10 +64,10 @@ jobs:
     inputs:
       mlflow_model_path: ${{parent.inputs.mlflow_model_path}}
 
-      compute_model_import: ${{parent.inputs.compute_model_import}}
-      compute_preprocess: ${{parent.inputs.compute_preprocess}}
-      compute_finetune: ${{parent.inputs.compute_finetune}}
-      compute_model_evaluation: ${{parent.inputs.compute_model_evaluation}}
+      # compute_model_import: ${{parent.inputs.compute_model_import}}
+      # compute_preprocess: ${{parent.inputs.compute_preprocess}}
+      # compute_finetune: ${{parent.inputs.compute_finetune}}
+      # compute_model_evaluation: ${{parent.inputs.compute_model_evaluation}}
 
       train_file_path: ${{parent.inputs.train_file_path}}
       validation_file_path: ${{parent.inputs.validation_file_path}}
