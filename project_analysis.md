@@ -56,6 +56,10 @@ I decided to use the following models:
 
 Model-training details would go here.
 
+## Data preparation
+
+Refer to create_dataset_save.
+
 ## Baseline predictions
 
 I chose 3 functions that represent the range of complexity within our code.
@@ -167,3 +171,8 @@ return df
     a whole set of code that successfully incorporates a new feature in the
     codebase.  So what we are ignoring is class definitions, how classes relate
     to each other.
+
+## Ideas for future work
+- sequence length limitations, ignoring classes
+- Basic prompt engineering
+- Limitations of testing on only 3 functions
