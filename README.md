@@ -1,19 +1,19 @@
 ### Test different code-generation LLMs against proprietary codebase
 
 Code leverages AzureML to finetune existing models on codebase.
-Make sure you are connected to your AzureML subscription and make sure that you
-have already created a workspace.
+Make sure you are connected to your AzureML subscription.
 We use the AzureML CLI syntax, so run the following in the command line.
 
-1. Run the shell script
+1. Open up the shell script referenced below and change the name of the resource
+group to yours.  Run the shell script from your command line.
 
 `sh codegen_model_comparison/run_pipeline.sh`
 
-2. After it finishes, open the shell script again and run the commands from
-it to get the job name.
+2. After it finishes, run:
+
 `az ml job list -r 1`
 
-Then run the next line with the job name from the previous result
+3. Then run the next line with the job name from the previous result:
 `az ml job download --all -n <job name>`
 
 ----------------
