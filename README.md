@@ -17,7 +17,8 @@ group to yours.  Run the shell script from your command line.
 `az ml job download --all -n <job name>`
 
 ----------------
-Architecture:
+### Architecture
+
 We are interested in 3 things:
 1. Establish baseline code model performance on test functions
 2. Finetune code models with our own functions
@@ -29,7 +30,7 @@ we combine them into 1 Azure component.  So we have essentially 2 components tha
 wan reuse for different code-generating models that we want to run.
 
 -------------------
-Thoughts
+### Thoughts
 - In theory, highly descriptive docstrings for functions that have a set
 structure to them should lend themselves well to language modeling
 - OTOH, there are lots of outside concepts that the LM doesn't know to incorporate
