@@ -9,15 +9,15 @@ inputs:
   data:
     type: uri_file
     path: azureml:functions:1
-    #path: azureml:functions_for_testing:1
-  batch_size: 20
+  batch_size: 100
   seq_length: 500
-  epochs: 10
-  #checkpoint1: "stanford-crfm/alias-gpt2-small-x21"
+  epochs: 6
+  #checkpoint1: "stanford-crfm/alias-gpt2-small-x21"   # small model for testing
   checkpoint1: "Salesforce/codegen-350M-mono"
   checkpoint2: "Deci/DeciCoder-1b"
+  checkpoint3: "codeparrot/codeparrot"
 settings:
-  default_compute: azureml:cpu-cheap
+  default_compute: azureml:cpu-mid
 outputs:
   model1:
     type: uri_folder
@@ -25,9 +25,14 @@ outputs:
   model2:
     type: uri_folder
     name: finetuned_decicoder_model
+  model3:
+    type: uri_folder
+    name: finetuned_codeparrot_model
   results1:
     type: uri_folder
   results2:
+    type: uri_folder
+  results3:
     type: uri_folder
 jobs:
   finetune_codegen:
@@ -41,7 +46,7 @@ jobs:
     outputs:
       model: ${{parent.outputs.model1}}
     code: ../src
-    environment: azureml:codegen_env@latest
+    environment: azureml:codegen_env:1
     command: >-
       python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --epochs ${{inputs.epochs}} --model_dir ${{outputs.model}}
 
@@ -54,7 +59,7 @@ jobs:
     outputs:
       output_dir: ${{parent.outputs.results1}}
     code: ../src
-    environment: azureml:codegen_env@latest
+    environment: azureml:codegen_env:1
     command: >-
       python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
 
@@ -70,7 +75,7 @@ jobs:
     outputs:
       model: ${{parent.outputs.model2}}
     code: ../src
-    environment: azureml:codegen_env@latest
+    environment: azureml:codegen_env:1
     command: >-
       python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --epochs ${{inputs.epochs}} --model_dir ${{outputs.model}}
 
@@ -83,7 +88,36 @@ jobs:
     outputs:
       output_dir: ${{parent.outputs.results2}}
     code: ../src
-    environment: azureml:codegen_env@latest
+    environment: azureml:codegen_env:1
+    command: >-
+      python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
+
+
+  finetune_codeparrot:
+    type: command
+    inputs:
+      checkpoint: ${{parent.inputs.checkpoint3}}
+      data: ${{parent.inputs.data}}
+      batch_size: ${{parent.inputs.batch_size}}
+      seq_length: ${{parent.inputs.seq_length}}
+      epochs: ${{parent.inputs.epochs}}
+    outputs:
+      model: ${{parent.outputs.model3}}
+    code: ../src
+    environment: azureml:codegen_env:1
+    command: >-
+      python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --epochs ${{inputs.epochs}} --model_dir ${{outputs.model}}
+
+
+  predict_codeparrot:
+    type: command
+    inputs:
+      checkpoint: ${{parent.inputs.checkpoint3}}
+      model_folder: ${{parent.jobs.finetune_codeparrot.outputs.model}}
+    outputs:
+      output_dir: ${{parent.outputs.results3}}
+    code: ../src
+    environment: azureml:codegen_env:1
     command: >-
       python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
 
