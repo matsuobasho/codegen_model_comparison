@@ -5,17 +5,38 @@ Make sure you are connected to your AzureML subscription and make sure that you
 have already created a workspace.
 We use the AzureML CLI syntax, so run the following in the command line.
 
-Enter commands in the cli.
+1. Run the shell script
 
-1. Configure default workspace and environment.  This allows you to not have to specify these arguments in subsequent calls.\
-`az configure --defaults workspace=<ws_name> group=<resource_group_name>`
+`sh codegen_model_comparison/run_pipeline.sh`
 
-2. Create compute instance.  Specify the location and computes that you have access to under your Azure subscription in the compute yaml file, along with the compute name. \
-`az ml compute create -f codegen_model_comparison/cloud/compute.yaml`
-In pipeline.yaml, specify the compute you've created under the default_compute field.
+2. After it finishes, open the shell script again and run the commands from
+it to get the job name.
+`az ml job list -r 1`
 
-2. Create environment.  This leverages the `environment.yaml` file to create a custom environment.\
-`az ml environment create -f codegen_model_comparison/cloud/environment/environment.yaml`
+Then run the next line with the job name from the previous result
+`az ml job download --all -n <job name>`
 
-3. Launch the job.\
-`az ml job create -f codegen_model_comparison/cloud/pipeline.yaml`
+----------------
+Architecture:
+We are interested in 3 things:
+1. Establish baseline code model performance on test functions
+2. Finetune code models with our own functions
+3. Examine finetuned model performance on test functions
+
+Though these are 3 distinct steps, we have to be mindful of using computational
+resources efficiently.  Since steps 1 and 3 require the same models to be loaded,
+we combine them into 1 Azure component.  So we have essentially 2 components that
+wan reuse for different code-generating models that we want to run.
+
+-------------------
+Thoughts
+- In theory, highly descriptive docstrings for functions that have a set
+structure to them should lend themselves well to language modeling
+- OTOH, there are lots of outside concepts that the LM doesn't know to incorporate
+(in this case physics), and there are also interpdendencies, which if not spelled
+out explicitly, the LM won't know what to do with
+- We want the model to be robust to imperfections
+- I began the project aspiring to incorporate hyperparameter tuning, but decided
+to simplify to just static parameters as a first step
+
+
