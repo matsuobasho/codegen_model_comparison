@@ -7,40 +7,14 @@ import sys
 import datasets
 import evaluate
 import torch
-from transformers import (AutoModelForCausalLM, AutoTokenizer,
-                          DataCollatorWithPadding, Trainer, TrainingArguments)
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from dataset_test import prompt, answer
-
-
-def tokenize_function(example, tokenizer, seq_length):
-    return tokenizer(
-        example['text'],
-        padding="max_length",
-        truncation=True,
-        max_length=seq_length,
-    )
-
-
-def add_labels(example):
-    example['label'] = example['input_ids']
-    return example
-
-
-def generate_text(prompt, model_, tok_, device, **kwargs):
-    model_inputs = tok_(prompt, return_tensors="pt").to(device)
-    generated_ids = model_.generate(**model_inputs, **kwargs)
-    # feed only the newly-generated ids to decode
-    res = tok_.batch_decode(generated_ids[:,
-                                          model_inputs['input_ids'].shape[1]:],
-                            skip_special_tokens=True)[0]
-    return res
+import funcs
 
 
 def main(args):
     checkpoint = args.checkpoint
-    # metrics_path = args.metrics_path
-    # baseline_preds_path = args.baseline_preds_path
     model_folder = args.model_folder
     output_dir = args.output_dir
 
@@ -57,14 +31,21 @@ def main(args):
     model = AutoModelForCausalLM.from_pretrained(
         checkpoint, trust_remote_code=True).to(device)
 
+    logger.info('Predict baselines')
     baseline_predictions = list(
         map(
-            lambda text: generate_text(text,
-                                       model,
-                                       tokenizer,
-                                       device,
-                                       repetition_penalty=50.0,
-                                       max_new_tokens=1000), prompt))
+            lambda text: funcs.generate_text(
+                text,
+                model,
+                tokenizer,
+                device,
+                repetition_penalty=50.0,
+                pad_token_id=tokenizer.pad_token_id,
+                #max_new_tokens=1000,
+                #min_length=200,  # Commenting out for CodeParrot, otherwise get IndexError
+                max_length=1000  # for CodeParrot only
+            ),
+            prompt))
 
     with open(output_dir + '/preds_baseline.pkl', 'wb') as f:
         pickle.dump(baseline_predictions, f)
@@ -81,18 +62,23 @@ def main(args):
         pickle.dump(metrics_baseline, f)
 
     logger.info('Load finetuned model')
-    model_finetuned = AutoModelForCausalLM.from_pretrained(model_folder,
-                                                           device_map="auto")
+    model_finetuned = AutoModelForCausalLM.from_pretrained(model_folder).to(
+        device)
 
     logger.info('Predict on test data')
     test_predictions = list(
         map(
-            lambda text: generate_text(text,
-                                       model_finetuned,
-                                       tokenizer,
-                                       device,
-                                       repetition_penalty=50.0,
-                                       min_length=200), prompt))
+            lambda text: funcs.generate_text(
+                text,
+                model_finetuned,
+                tokenizer,
+                device,
+                repetition_penalty=50.0,
+                pad_token_id=tokenizer.pad_token_id,
+                #min_length=200, # commenting out for CodeParrot, otherwise get IndexError
+                max_length=1000)  # for CodeParrot
+            ,
+            prompt))
 
     with open(output_dir + '/preds_test.pkl', 'wb') as f:
         pickle.dump(test_predictions, f)
@@ -109,8 +95,6 @@ def main(args):
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str)
-    # parser.add_argument("--metrics_path", type=str)
-    # parser.add_argument("--baseline_preds_path", type=str)
     parser.add_argument("--model_folder", type=str)
     parser.add_argument("--output_dir", type=str)
     args = parser.parse_args()
