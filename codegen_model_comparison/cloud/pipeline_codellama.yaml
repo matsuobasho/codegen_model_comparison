@@ -10,9 +10,9 @@ inputs:
     type: uri_file
     path: azureml:functions:1
     #path: azureml:functions_for_testing:1
-  batch_size: 20
+  batch_size: 2
   seq_length: 500
-  epochs: 1
+  epochs: 4
   checkpoint: "codellama/CodeLlama-7b-hf"
 settings:
   default_compute: azureml:gpu-mid
@@ -38,14 +38,16 @@ jobs:
     command: >-
       python finetune.py --checkpoint ${{inputs.checkpoint}} --data_path ${{inputs.data}} --batch_size ${{inputs.batch_size}} --seq_length ${{inputs.seq_length}} --epochs ${{inputs.epochs}} --model_dir ${{outputs.model}}
 
-  # predict_codellama:
-  #   type: command
-  #   inputs:
-  #     checkpoint: ${{parent.inputs.checkpoint1}}
-  #     model_folder: ${{parent.jobs.finetune_codegen.outputs.model}}
-  #   outputs:
-  #     output_dir: ${{parent.outputs.results1}}
-  #   code: ../src
-  #   environment: azureml:codegen_env@latest
-  #   command: >-
-  #     python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
+
+  predict_codellama:
+    type: command
+    inputs:
+      checkpoint: ${{parent.inputs.checkpoint1}}
+      model_folder: ${{parent.jobs.finetune_codegen.outputs.model}}
+    outputs:
+      output_dir: ${{parent.outputs.results1}}
+    code: ../src
+    environment: azureml:codegen_env@latest
+    command: >-
+      python predict.py --checkpoint ${{inputs.checkpoint}} --model_folder ${{inputs.model_folder}} --output_dir ${{outputs.output_dir}}
+
